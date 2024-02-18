@@ -19,7 +19,7 @@ class Translator:
 
     def _translate(self, message) -> str:
         source = 'auto' if self.auto_translate else self.curr_lang
-        return GoogleTranslator(source=source, target=self.default_language)
+        return GoogleTranslator(source=source, target=self.curr_lang)
 
     def translate(self, message) -> str:
         return self._translate(message)

@@ -15,11 +15,13 @@ class Translator:
     lang_list = _languages
     lang_dict = _languages_dict
     rev_lang_list = [abb for lang, abb in _languages_dict.items()]
-    auto_translate: bool = False
+    
+    def __init__(self, auto_translate = False):
+        self.auto_translate = auto_translate
 
     def _translate(self, message) -> str:
         source = 'auto' if self.auto_translate else self.curr_lang
-        return GoogleTranslator(source=source, target=self.curr_lang)
+        return GoogleTranslator(source=source, target=self.curr_lang).translate(message)
 
     def translate(self, message) -> str:
         return self._translate(message)

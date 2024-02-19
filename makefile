@@ -6,8 +6,8 @@ PYTHON := $(V_ENV)/bin/python
 PYTEST := $(V_ENV)/bin/pytest
 
 prepare_venv: ## If environment does not exist, create it
-	# It is crucial venv/anaconda is used, virtualenv created issues that could \
-	# not allow logging to be packaged
+    ## It is crucial venv/anaconda is used, virtualenv created issues that could 
+    ## not allow logging to be packaged
 	@test -d ${V_ENV} && exit 0 ; echo "Env not found, creating..." ; \
 	python -m venv ${V_ENV} ; \
 	. ${V_ENV}/bin/activate ; \

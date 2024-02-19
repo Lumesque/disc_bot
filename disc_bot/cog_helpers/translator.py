@@ -1,6 +1,5 @@
 from deep_translator import GoogleTranslator
 from ..exceptions.translator import LanguageNotFoundError
-from dataclasses import dataclass
 import logging
 logger = logging.getLogger('translator')
 

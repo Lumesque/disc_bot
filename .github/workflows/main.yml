@@ -12,5 +12,7 @@
       steps:
       - name: checkout repo
         uses: actions/checkout@main
-      - name: build application
+      - name: unit_tests
         run: make unit_tests
+      - name: clean
+        run: make clean

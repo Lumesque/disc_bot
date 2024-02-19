@@ -1,7 +1,8 @@
 _ENV := $(shell dirname $(PWD))
+_ENV := ${PWD}
 RED := '\033[0;31m'
 NO_COLOR := '\033[0m'
-V_ENV := $(shell dirname $(PWD))/bot_env
+V_ENV := ${_ENV}/bot_env
 PYTHON := $(V_ENV)/bin/python
 PYTEST := $(V_ENV)/bin/pytest
 

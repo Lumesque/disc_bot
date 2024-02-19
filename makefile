@@ -6,6 +6,8 @@ V_ENV := ${_ENV}/bot_env
 PYTHON := $(V_ENV)/bin/python
 PYTEST := $(V_ENV)/bin/pytest
 
+.PHONY: clean
+
 prepare_venv: ## If environment does not exist, create it
     ## It is crucial venv/anaconda is used, virtualenv created issues that could 
     ## not allow logging to be packaged
@@ -22,5 +24,5 @@ check_env: ## Checks if environment files, like .env, are present for bot config
 unit_tests: prepare_venv ## Runs the unit tests for pytest
 	$(PYTEST) -v -s disc_bot/tests/unit_tests
 
-test:
-	@echo "$(PWD)"
+clean:
+	rm -rf bot_env

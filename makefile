@@ -18,11 +18,16 @@ prepare_venv: ## If environment does not exist, create it
 
 check_env: ## Checks if environment files, like .env, are present for bot config
 	@test -f .env && exit 0 || echo -e ${RED}WARNING: .env file not preset, \
-	discord bot unable to function ${NO_COLOR} && exit 2
-
+	discord bot unable to function ${NO_COLOR} && \
+	echo "BOT_TOKEN=xxxxxxx" >> .env && \
+	exit 2
 
 unit_tests: prepare_venv ## Runs the unit tests for pytest
 	$(PYTEST) -v -s disc_bot/tests/unit_tests
+
+
+test_bots: prepare_venv check_env
+	exit 0
 
 clean:
 	rm -rf bot_env

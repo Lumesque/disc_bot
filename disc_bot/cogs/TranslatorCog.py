@@ -1,15 +1,16 @@
 from discord.ext import commands
 
 import logging
+from ..cog_helpers.translator import Translator
 logger = logging.getLogger('translator')
 
 
 
 class Translation_Commands(commands.Cog):
 
-    def __init__(self, bot, translator):
+    def __init__(self, bot, translator=None):
         self.bot = bot
-        self.translator = translator
+        self.translator = translator if translator is not None else Translator()
 
     @commands.Cog.listener()
     async def on_message(self, message):

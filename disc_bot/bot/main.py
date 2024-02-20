@@ -3,18 +3,15 @@ import discord
 import logging
 
 from discord.ext import commands
-from cogs import cogs_list
-from dotenv import load_dotenv
-if not load_dotenv():
-    raise FileNotFoundError("No .env")
+from ..cogs import cogs_list
 
 logger = logging.getLogger("bot")
 
-def run_bot():
+def run(token, intents):
     bot = commands.Bot(
             command_prefix = '!',
             guild_subscriptions = True,
-            intents = discord.Intents.all()
+            intents = intents 
             )
 
     @bot.event
@@ -23,9 +20,9 @@ def run_bot():
 
     async def setup(bot):
         for cog in cogs_list:
-            bot.add_cog(cog(bot))
+            await bot.add_cog(cog(bot))
         logger.debug(
-                f"Successfully registered {', ',join(cogs_list)}"
+                f"Successfully registered {', '.join([str(x) for x in cogs_list])}"
                 )
 
-    bot.run(os.getenv["BOT_TOKEN"])
+    bot.run(token)

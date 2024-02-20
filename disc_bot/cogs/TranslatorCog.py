@@ -10,7 +10,9 @@ class Translation_Commands(commands.Cog):
 
     def __init__(self, bot, translator=None):
         self.bot = bot
-        self.translator = translator if translator is not None else Translator()
+        self.translator = ( translator 
+                          if translator is not None 
+                          else Translator(auto_translate = True))
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -25,3 +27,6 @@ class Translation_Commands(commands.Cog):
 
     def repr(self):
         return f"{self.__class__.__name__}"
+
+    def str(self):
+        return repr(self)

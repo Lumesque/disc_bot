@@ -25,8 +25,8 @@ unit_tests: prepare_venv ## Runs the unit tests for pytest
 	$(PYTEST) -v -s disc_bot/tests/unit_tests
 
 
-test_bots: prepare_venv check_env
-	exit 0
+bot_tests: prepare_venv check_env
+	$(PYTHON) -m disc_bot.tests.bot_tests.test_bot_translates
 
 clean:
 	rm -rf bot_env

@@ -1,4 +1,3 @@
-_ENV := $(shell dirname $(PWD))
 _ENV := ${PWD}
 RED := '\033[0;31m'
 NO_COLOR := '\033[0m'

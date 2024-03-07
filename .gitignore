@@ -161,3 +161,6 @@ cython_debug/
 
 # Venv 
 bot_env/
+
+# history
+**/history.json

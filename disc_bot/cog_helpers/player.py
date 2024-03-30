@@ -10,4 +10,6 @@ class DiscordPlayer:
 
     def __post_init__(self):
         if self.score is None:
+            # this must be done in post init since the definition of _G will be
+            # defined on import for all instances of this class 
             self.score = _G.DEFAULT_SCORE

@@ -8,17 +8,20 @@ import warnings
 
 class ServerContainer(UserDict):
 
-    def get_player(self, server_id, user_id):
+    def get_player(self, server_id, user_id, name=None):
         player = self.get_server(server_id).get(user_id, None)
         if player is None:
             if _G.AUTOCREATE:
-                player = self.add_player(server_id, user_id)
+                player = self.add_player(server_id, user_id, name=name)
                 warnings.warn(
                         "Player does not exist, creating new player. If you would like to not see this message, please disable auto-creation, or add player and save"
                         )
             else:
                 raise PlayerNotFound(f"Player {user_id} not found in server {server_id}")
         return player
+    
+    def get_player_from_context(self, ctx):
+        return self.get_player(ctx.guild.id, ctx.author.id, name=ctx.author.display_name)
 
     def get_server(self, server_id):
         server = self.data.get(server_id, None)
@@ -37,9 +40,9 @@ class ServerContainer(UserDict):
             self.data[server_id] = {}
         return self.data[server_id]
 
-    def add_player(self, server_id, user_id):
+    def add_player(self, server_id, user_id, name=None):
         server = self.get_server(server_id)
-        server[user_id] = (player := DiscordPlayer(user_id, server_id))
+        server[user_id] = (player := DiscordPlayer(user_id, server_id, name=name))
         return player
 
     def remove_server(self, server_id):

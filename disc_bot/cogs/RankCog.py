@@ -39,7 +39,7 @@ class Rank_Commands(commands.Cog):
          
     @commands.command() 
     async def add_one(self, ctx): 
-        self.servers.get_player(ctx.guild.id, ctx.author.id).score += 1
+        self.servers.get_player_from_context(ctx).score += 1
         pprint(self.servers)
 
          
@@ -50,7 +50,7 @@ class Rank_Commands(commands.Cog):
     @commands.command()
     async def reward_player(self, ctx, score):
         for member in ctx.message.mentions:
-            self.servers.get_player(ctx.guild.id, member.id).score += int(score)
+            self.servers.get_player_from_context(ctx).score += int(score)
         pprint(self.servers)
 
     @commands.command()

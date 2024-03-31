@@ -1,0 +1,19 @@
+from discord.ext import commands
+import argparse
+import shlex
+
+class toggle(argparse.Action):
+
+
+
+class Admin_Commands(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+
+    @commands.command(hidden=True)
+    async def manage(self, ctx, *args, **kwargs):
+        """Manage the bot. This command is hidden from the help command."""
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--toggle-creation", action="store_true")
+        args = shlex.split(ctx.message.clean_content)
+        await ctx.channel.send(", ".join(args))

@@ -62,7 +62,7 @@ class Bidding_Commands(commands.Cog):
             self.bidders = {}
             await ctx.channel.send(f"""
                                    The winning number is: **
-                                   ##{rolled}
+                                   ## {rolled}
                                    __Winners__:
                                        {winners}
                                    __Losers__: 

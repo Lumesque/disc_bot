@@ -21,9 +21,23 @@ class Translation_Commands(commands.Cog):
             translated = self.translator.translate(message.content)
             if translated and translated != message.content:
                 logger.debug(
-                        f'Bot {self.bot.user} translated "{message.content}" -> {translated}'
-                        )
+                    f'BOT TRANSLATION EVENT::' 
+                    + f'"{message.content}" -> {translated}'
+                )
                 await message.channel.send(translated)
+
+    @commands.command()
+    async def set_language(self, ctx, language: str):
+        self.translator.set_language(language)
+        await ctx.send(f"Changed default language to {language}")
+
+    @commands.command()
+    async def print_language(self, ctx):
+        await ctx.send(self.translator.curr_lang)
+
+    @commands.command()
+    async def possible_languages(self, ctx):
+        await ctx.send(self.translator.format_possible_languages())
 
     def repr(self):
         return f"{self.__class__.__name__}"

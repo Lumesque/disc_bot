@@ -1,6 +1,8 @@
 from dataclasses import dataclass, InitVar
 from typing import Optional
 from ..config.globals import _G
+import logging
+logger = logging.getLogger('discord_player')
 
 @dataclass
 class DiscordPlayer:

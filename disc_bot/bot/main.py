@@ -24,5 +24,7 @@ def run(token, intents):
         logger.debug(
                 f"Successfully registered {', '.join([str(x) for x in cogs_list])}"
                 )
+        # Use this to create a custom event
+#        bot.dispatch("test_event", 1, 2)
 
     bot.run(token)

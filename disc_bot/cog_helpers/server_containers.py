@@ -1,10 +1,39 @@
-from typing import ClassVar
+from typing import ClassVar, Iterable
 from collections import UserDict
 from .player import DiscordPlayer
 from ..config.globals import _G
 from ..exceptions.ranks import PlayerNotFound
-from dataclasses import dataclass as dc
+from copy import copy
+import dataclasses as dc
 import warnings
+import json
+
+IGNORED_KEYS=("admin_ids", "roles")
+
+def int_all_in_dict(x: dict):
+    """
+    {
+      '<server_id>': {
+          'admin_ids': [<role_id>, <role_id>, ...],
+          'roles': {
+            '<role_id>': (<lower_point>, <greater_point>),
+            ...
+          },
+          '<user_id>':
+            {
+              'score': <score>,
+              'name': <name>
+            }
+        }
+    }
+    """
+    converter = lambda x: int(x) if isinstance(x, str) and x.isdigit() else x
+    return {
+        converter(k): int_all_in_dict(v) 
+        if isinstance(v, dict) 
+        else [converter(x) for x in v] if isinstance(v, (list, tuple)) 
+        else v for k, v in x.items()
+    }
 
 class ServerContainer(UserDict):
 
@@ -53,8 +82,38 @@ class ServerContainer(UserDict):
         """
         {
           '<server_id>':
-            'admin_ids': [<role_id>, <role_id>, ...]
+            'admin_ids': [<role_id>, <role_id>, ...],
+            'roles': {
+              '<role_id>': (<lower_point>, <greater_point>),
+              ...
+            },
+          '<user_id>':
             {
+              'score': <score>,
+              'name': <name>
+            }
+        """
+        # Turn all numerics into numerical for searching
+        json_data = int_all_in_dict(json_data)
+        for server_id in json_data:
+            temp = json_data[server_id]
+            for user_id in temp:
+                if not isinstance(temp[user_id], dict) or user_id in IGNORED_KEYS:
+                    continue
+                data = json_data[server_id][user_id]
+                # If we get this far, this should be a user id, maybe add check?
+                temp[user_id] = DiscordPlayer(**data)
+        return cls(json_data)
+
+    def to_json(self):
+        """
+        {
+          '<server_id>': {
+              'admin_ids': [<role_id>, <role_id>, ...],
+              'roles': {
+                '<role_id>': (<lower_point>, <greater_point>),
+                ...
+              },
               '<user_id>':
                 {
                   'score': <score>,
@@ -62,19 +121,15 @@ class ServerContainer(UserDict):
                 }
             }
         """
-        for server_id in json_data:
-            for user_id in json_data[server_id]:
-                if not isinstance(user_id, dict):
-                    continue
-                data = json_data[server_id][user_id]
-                json_data[server_id][user_id] = DiscordPlayer(**data)
-        return cls(json_data)
-
-    def to_json(self):
         temp = self.data.copy()
         for server_id in temp:
-            for user_id in temp[server_id]:
-                data = temp[server_id][user_id]
-                temp[server_id][user_id] = dc.as_dict(data)
+            current_server = temp[server_id] # {'admin_ids': [<role_id>, <role_id>, ...], 'roles': {...}, '<user_id>': {...}}
+            for key in current_server:
+                current_user = current_server[key]
+                # Serialize 
+                if not dc.is_dataclass(current_user):
+                    continue
+                temp[server_id][key] = dc.asdict(current_user)
+        print(temp)
         return temp
 

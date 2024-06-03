@@ -10,6 +10,7 @@ class DiscordPlayer:
     server_id: int
     score: Optional[int] = None
     name: Optional[str] = None
+    rank_role: Optional[str] = None
 
     def __post_init__(self):
         if self.score is None:

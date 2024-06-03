@@ -44,9 +44,10 @@ class Bidding_Commands(commands.Cog):
             await ctx.channel.send("Bidding has ended, please wait for final results.")
             rolled = random.randint(1, 11)
             winners, losers = "", ""
+            scores = self.bot.get_cog('Scores')
             for player, player_bid in self.bidders.items():
                 if player_bid.guess == rolled:
-                    player.score = player.score + \
+                    change = player.score + \
                         player_bid.bid * (
                             1.2 + (
                                 len(self.bidders) / 10
@@ -54,9 +55,10 @@ class Bidding_Commands(commands.Cog):
                                 else .4
                                 )
                             )
+                    scores.update_score(ctx, ctx.guild.id, player.id, name=player.name, change=change)
                     winners += f"{player.name} "
                 else:
-                    player.score -= player_bid.bid
+                    scores.update_score(ctx,ctx.guild.id, player.id, name=player.name, change=-player_bid.bid)
                     losers += f"{player.name} "
             next(self.state)
             self.bidders = {}

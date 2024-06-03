@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from ..cog_helpers.server_containers import ServerContainer
+from ..cog_helpers.server_containers import ServerContainer, IGNORED_KEYS
 from ..config.globals import _G
 from ..server_data import servers
 from pprint import pprint
@@ -20,24 +20,27 @@ class Rank_Commands(commands.Cog):
         await ctx.send(f"Added {', '.join(names)}")
 
     @commands.command()
-    async def reward(self, ctx, score):
+    async def reward(self, ctx, score = commands.parameter(converter=float)):
         members = ctx.message.mentions
         names = [member.display_name for member in members]
+        scores = self.bot.get_cog('Scores')
         for member in members:
-            self.servers.get_player(ctx.guild.id, member.id, name=member.display_name).score += int(score)
+            scores.update_score(ctx, ctx.guild.id, member.id, name=member.display_name, change=score)
         await ctx.send(f"Updated scores for {', '.join(names)}")
 
     @commands.command()
-    async def punish(self, ctx, score):
+    async def punish(self, ctx, score = commands.parameter(converter=float)):
         members = ctx.message.mentions
         names = [member.display_name for member in members]
+        scores = self.bot.get_cog('Scores')
         for member in members:
-            self.servers.get_player(ctx.guild.id, member.id, name=member.display_name).score -= int(score)
+            scores.update_score(ctx, ctx.guild.id, member.id, name=member.display_name, change=-score)
         await ctx.send(f"Updated scores for {', '.join(names)}")
         
     @commands.command()
     async def ranks(self, ctx):
         server = self.servers.get_server(ctx.guild.id)
+        server = {k: v for k, v in server.items() if k not in IGNORED_KEYS}
         _list = list(sorted(server.values(), key=lambda x: x.score, reverse=True))
         await ctx.send(_list)
         embed = discord.Embed(

@@ -27,6 +27,13 @@ unit_tests: prepare_venv ## Runs the unit tests for pytest
 
 bot_tests: prepare_venv check_env
 	$(PYTHON) -m disc_bot.tests.bot_tests.test_bot_translates
+	$(PYTHON) -m disc_bot.tests.bot_tests.test_admin_roles
+
+translate_tests: prepare_venv check_env
+	$(PYTHON) -m disc_bot.tests.bot_tests.test_bot_translates
+
+admin_tests: prepare_venv check_env
+	$(PYTHON) -m disc_bot.tests.bot_tests.test_admin_roles
 
 clean:
 	rm -rf bot_env

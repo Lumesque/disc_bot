@@ -4,6 +4,7 @@ import logging
 
 from discord.ext import commands
 from ..cogs import cogs_list
+from ..utils import is_admin
 
 logger = logging.getLogger("bot")
 
@@ -26,5 +27,10 @@ def run(token, intents):
                 )
         # Use this to create a custom event
 #        bot.dispatch("test_event", 1, 2)
+
+    @bot.command()
+    @commands.check(is_admin)
+    async def ping(ctx):
+        await ctx.send("Pong!")
 
     bot.run(token)

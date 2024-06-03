@@ -7,6 +7,7 @@ import shlex
 import re
 
 def get_role_ids(_msg):
+    print(_msg)
     return re.findall("\d{19}", _msg)
 
 class toggle_autocreate(argparse.Action):

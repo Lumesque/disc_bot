@@ -50,8 +50,22 @@ class ServerContainer(UserDict):
 
     @classmethod
     def from_history(cls, json_data):
+        """
+        {
+          '<server_id>':
+            'admin_ids': [<role_id>, <role_id>, ...]
+            {
+              '<user_id>':
+                {
+                  'score': <score>,
+                  'name': <name>
+                }
+            }
+        """
         for server_id in json_data:
             for user_id in json_data[server_id]:
+                if not isinstance(user_id, dict):
+                    continue
                 data = json_data[server_id][user_id]
                 json_data[server_id][user_id] = DiscordPlayer(**data)
         return cls(json_data)

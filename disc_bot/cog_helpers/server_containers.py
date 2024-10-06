@@ -1,5 +1,6 @@
 from typing import ClassVar, Iterable
 from collections import UserDict
+from copy import deepcopy
 from .player import DiscordPlayer
 from ..config.globals import _G
 from ..exceptions.ranks import PlayerNotFound
@@ -8,7 +9,7 @@ import dataclasses as dc
 import warnings
 import json
 
-IGNORED_KEYS=("admin_ids", "roles")
+IGNORED_KEYS=("admin_ids", "roles", "events", "positive_emojis", "negative_emojis", "blacklisted_channels")
 
 def int_all_in_dict(x: dict):
     """
@@ -29,9 +30,9 @@ def int_all_in_dict(x: dict):
     """
     converter = lambda x: int(x) if isinstance(x, str) and x.isdigit() else x
     return {
-        converter(k): int_all_in_dict(v) 
-        if isinstance(v, dict) 
-        else [converter(x) for x in v] if isinstance(v, (list, tuple)) 
+        converter(k): int_all_in_dict(v)
+        if isinstance(v, dict)
+        else [converter(x) for x in v] if isinstance(v, (list, tuple))
         else v for k, v in x.items()
     }
 
@@ -40,7 +41,7 @@ class ServerContainer(UserDict):
     def get_player(self, server_id, user_id, name=None):
         player = self.get_server(server_id).get(user_id, None)
         if player is None:
-            if _G.AUTOCREATE:
+            if _G.AUTOCREATE_USER:
                 player = self.add_player(server_id, user_id, name=name)
                 warnings.warn(
                         "Player does not exist, creating new player. If you would like to not see this message, please disable auto-creation, or add player and save"
@@ -48,14 +49,14 @@ class ServerContainer(UserDict):
             else:
                 raise PlayerNotFound(f"Player {user_id} not found in server {server_id}")
         return player
-    
+
     def get_player_from_context(self, ctx):
         return self.get_player(ctx.guild.id, ctx.author.id, name=ctx.author.display_name)
 
     def get_server(self, server_id):
         server = self.data.get(server_id, None)
         if server is None:
-            if _G.AUTOCREATE:
+            if _G.AUTOCREATE_SERVER:
                 server = self.add_server(server_id)
                 warnings.warn(
                         "Server does not exist, creating new server. If you would like to not see this message, please disable auto-creation, or add server and save"
@@ -121,15 +122,14 @@ class ServerContainer(UserDict):
                 }
             }
         """
-        temp = self.data.copy()
+        temp = deepcopy(self.data)
         for server_id in temp:
             current_server = temp[server_id] # {'admin_ids': [<role_id>, <role_id>, ...], 'roles': {...}, '<user_id>': {...}}
             for key in current_server:
                 current_user = current_server[key]
-                # Serialize 
+                # Serialize
                 if not dc.is_dataclass(current_user):
                     continue
                 temp[server_id][key] = dc.asdict(current_user)
         print(temp)
         return temp
-

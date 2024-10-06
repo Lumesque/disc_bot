@@ -2,6 +2,7 @@ from types import SimpleNamespace
 
 # global lookup table
 _G = SimpleNamespace(
-    AUTOCREATE = True,
-    DEFAULT_SCORE = 1000
-        )
+    AUTOCREATE_SERVER=True,
+    AUTOCREATE_USER=True,
+    DEFAULT_SCORE=1000,
+)

@@ -2,26 +2,27 @@ from discord.ext import commands
 
 import logging
 from ..cog_helpers.translator import Translator
-logger = logging.getLogger('translator')
-
-
 
 class Translation_Commands(commands.Cog):
 
     def __init__(self, bot, translator=None):
         self.bot = bot
-        self.translator = ( translator 
-                          if translator is not None 
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.translator = ( translator
+                          if translator is not None
                           else Translator(auto_translate = True))
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if message.author != self.bot.user:
-            logger.info(f'User {message.author} sent "{message.clean_content}"')
+        checker = self.bot.get_cog('Checks')
+        if checker.is_blacklisted(message.guild.id, message.channel.id):
+            return
+        elif message.author != self.bot.user:
+            self.logger.info(f'User {message.author} sent "{message.clean_content}"')
             translated = self.translator.translate(message.content)
             if translated and translated != message.content:
-                logger.debug(
-                    f'BOT TRANSLATION EVENT::' 
+                self.logger.debug(
+                    f'BOT TRANSLATION EVENT::'
                     + f'"{message.content}" -> {translated}'
                 )
                 await message.channel.send(translated)
@@ -44,3 +45,7 @@ class Translation_Commands(commands.Cog):
 
     def str(self):
         return repr(self)
+
+
+async def setup(bot):
+    await bot.add_cog(Translation_Commands(bot))

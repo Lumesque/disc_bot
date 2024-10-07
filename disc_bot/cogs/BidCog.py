@@ -1,17 +1,24 @@
-from ..cog_helpers.state_machine import StateMachine
+import asyncio
+import logging
+import random
+from collections import namedtuple
+from typing import ClassVar
+
 import discord
 from discord import app_commands
 from discord.ext import commands
-from collections import namedtuple
+
+from ..cog_helpers.state_machine import StateMachine
 from ..server_data import servers
-import asyncio
-import random
-import logging
 
 PlayerBid = namedtuple("PlayerBid", ["bid", "guess"])
 
+MAX_INC_PLAYERS = 4
+
+
 class Bidding_Commands(commands.Cog):
-    bidders = {}
+    bidders: ClassVar = {}
+
     def __init__(self, bot):
         self.bot = bot
         self.state = StateMachine()
@@ -23,7 +30,7 @@ class Bidding_Commands(commands.Cog):
         if self.state.dead:
             self.logger.info("Starting bid...")
             next(self.state)
-            asyncio.create_task(self.timer(ctx))
+            asyncio.create_task(self.timer(ctx))  # noqa
             await ctx.channel.send("""
             Bidding has started and is open for 60 seconds. To join, please use the /join command followed by a number of points you're willing to offer.
             Potentially earn 120-160% of your original bid! Number increases based on the amount of players that join.
@@ -34,7 +41,7 @@ class Bidding_Commands(commands.Cog):
     @commands.command()
     async def join(self, ctx, bid, guess):
         if self.state.running:
-            cog = self.bot.get_cog('Rank_Commands')
+            cog = self.bot.get_cog("Rank_Commands")
             player = cog.servers.get_player_from_context(ctx)
             bid, guess = float(bid), int(guess)
             if bid > player.score:
@@ -45,7 +52,7 @@ class Bidding_Commands(commands.Cog):
             await ctx.channel.send("Bidding has not yet started.")
 
     @discord.app_commands.command()
-    async def join(self, interaction, bid: app_commands.Range[float, .1], guess: app_commands.Range[int, 1, 10]):
+    async def join(self, interaction, bid: app_commands.Range[float, 0.1], guess: app_commands.Range[int, 1, 10]):  # noqa
         if not self.state.running:
             await interaction.response.send_message("No bid is currently going on")
         else:
@@ -65,21 +72,16 @@ class Bidding_Commands(commands.Cog):
             rolled = random.randint(1, 11)
             self.logger.debug(f"Number rolled: {rolled}")
             winners, losers = "", ""
-            scores = self.bot.get_cog('Scores')
+            scores = self.bot.get_cog("Scores")
             for player, player_bid in self.bidders.items():
                 if player_bid.guess == rolled:
-                    change = player.score + \
-                        player_bid.bid * (
-                            1.2 + (
-                                len(self.bidders) / 10
-                                if len(self.bidders) < 4
-                                else .4
-                                )
-                            )
+                    change = player.score + player_bid.bid * (
+                        1.2 + (len(self.bidders) / 10 if len(self.bidders) < MAX_INC_PLAYERS else 0.4)
+                    )
                     scores.update_score(ctx, ctx.guild.id, player.id, name=player.name, change=change)
                     winners += f"{player.name} "
                 else:
-                    scores.update_score(ctx,ctx.guild.id, player.id, name=player.name, change=-player_bid.bid)
+                    scores.update_score(ctx, ctx.guild.id, player.id, name=player.name, change=-player_bid.bid)
                     losers += f"{player.name} "
             next(self.state)
             self.bidders = {}
@@ -101,10 +103,12 @@ class Bidding_Commands(commands.Cog):
         while timer > 0:
             await asyncio.sleep(1)
             timer -= 1
-            if self.state.dead: break
+            if self.state.dead:
+                break
             await msg.edit(content="Time left: " + str(timer))
         if self.state.running:
-            self.end_bid
+            await self.end_bid(ctx)
+
 
 async def setup(bot):
     await bot.add_cog(Bidding_Commands(bot))

@@ -1,7 +1,9 @@
-from ..cog_helpers.server_containers import ServerContainer
-from pathlib import Path
-import os
 import json
+import os
+from pathlib import Path
+
+from ..cog_helpers.server_containers import ServerContainer
+
 here = os.path.dirname(__file__)
 history = Path(here, "history.json")
 print(history)

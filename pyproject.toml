@@ -1,0 +1,112 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "disc_bot"
+dynamic = ["version"]
+description = ''
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+keywords = []
+authors = [
+  { name = "Joshua Luckie", email = "luckie.joshua.c@gmail.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+    "aiohttp==3.9.3",
+    "aiosignal==1.3.1",
+    "asttokens==2.4.1",
+    "attrs==23.2.0",
+    "beautifulsoup4==4.12.3",
+    "certifi==2024.2.2",
+    "charset-normalizer==3.3.2",
+    "colored==2.2.4",
+    "data-printer==0.0.8",
+    "decorator==5.1.1",
+    "deep-translator==1.11.4",
+    "discord==2.3.2",
+    "discord.py==2.3.2",
+    "discord_logging==1.0.0",
+    "dist-info==0.1.1",
+    "executing==2.0.1",
+    "frozenlist==1.4.1",
+    "idna==3.6",
+    "importlib-metadata==7.0.1",
+    "iniconfig==2.0.0",
+    "jedi==0.19.1",
+    "logging==0.4.9.6",
+    "matplotlib-inline==0.1.6",
+    "multidict==6.0.5",
+    "packaging==23.2",
+    "parso==0.8.3",
+    "pexpect==4.9.0",
+    "pluggy==1.4.0",
+    "prompt-toolkit==3.0.43",
+    "ptyprocess==0.7.0",
+    "pure-eval==0.2.2",
+    "Pygments==2.17.2",
+    "pytest==8.0.1",
+    "python-dotenv==1.0.1",
+    "python-logging-discord-handler==0.1.4",
+    "requests==2.31.0",
+    "six==1.16.0",
+    "soupsieve==2.5",
+    "stack-data==0.6.3",
+    "traitlets==5.14.1",
+    "urllib3==2.2.1",
+    "wcwidth==0.2.13",
+    "yarl==1.9.4",
+    "zipp==3.17.0",
+]
+
+[project.urls]
+Documentation = "https://github.com/Lumesque/disc_bot#readme"
+Issues = "https://github.com/Lumesque/disc_bot/issues"
+Source = "https://github.com/Lumesque/disc_bot"
+
+[tool.hatch.version]
+path = "disc_bot/__about__.py"
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/mod_manager tests}"
+
+[tool.coverage.run]
+source_pkgs = ["mod_manager", "tests"]
+branch = true
+parallel = true
+omit = [
+  "src/mod_manager/__about__.py",
+]
+
+[tool.coverage.paths]
+mod_manager = ["disc_bot", "disc_bot"]
+tests = ["*/disc_bot/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
+
+[tool.ruff]
+extend = "./ruff_defaults.toml"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

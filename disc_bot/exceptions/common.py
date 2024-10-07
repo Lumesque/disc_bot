@@ -1,5 +1,6 @@
-from contextlib import contextmanager
 import traceback
+from contextlib import contextmanager
+
 
 @contextmanager
 def e_print(message, print_stack=True, expected_exception=Exception):

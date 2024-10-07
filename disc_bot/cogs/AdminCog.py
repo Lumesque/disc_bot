@@ -1,42 +1,45 @@
-import discord
-from discord.ext import commands
-from ..config.globals import _G
-from ..server_data import servers, history
-from ..utils import is_admin
-from typing import Any
 import argparse
-import shlex
-import re
 import json
 import logging
+import re
+import shlex
+
+from discord.ext import commands
+
+from ..config.globals import _G
+from ..server_data import history, servers
+from ..utils import is_admin
+
 
 def get_role_ids(_msg):
-    return [int(x) for x in re.findall("\d{19}", _msg)]
+    return [int(x) for x in re.findall(r"\d{19}", _msg)]
+
 
 def get_channel_ids(_msg):
-    return [int(x) for x in re.findall("\d+", _msg)]
+    return [int(x) for x in re.findall(r"\d+", _msg)]
 
 
 class toggle_autocreate_user(argparse.Action):
-    def __init__(self, option_strings, dest, nargs=None, **kwargs):
+    def __init__(self, option_strings, dest, nargs=None, **kwargs):  # noqa
         super().__init__(option_strings, dest, nargs=0, **kwargs)
 
-    def __call__(self, parser, namespace, values, option_string=None):
+    def __call__(self, parser, namespace, values, option_string=None):  # noqa
         _G.AUTOCREATE_USER = not _G.AUTOCREATE_USER
 
 
 class toggle_autocreate_server(argparse.Action):
-    def __init__(self, option_strings, dest, nargs=None, **kwargs):
+    def __init__(self, option_strings, dest, nargs=None, **kwargs):  # noqa
         super().__init__(option_strings, dest, nargs=0, **kwargs)
 
-    def __call__(self, parser, namespace, values, option_string=None):
+    def __call__(self, parser, namespace, values, option_string=None):  # noqa
         _G.AUTOCREATE_SERVER = not _G.AUTOCREATE_SERVER
 
 
-def override__G(attr, type=str):
+def override__G(attr, type=str):  # noqa
     class Action(argparse.Action):
-        def __call__(self, parser, namespace, values, option_string=None):
+        def __call__(self, parser, namespace, values, option_string=None):  # noqa
             setattr(_G, attr, type(*values))
+
     return Action
 
 
@@ -53,7 +56,7 @@ class Admin_Commands(commands.Cog):
     @commands.command(hidden=True)
     async def addposemoji(self, ctx, emoji):
         server = servers.get_server(ctx.guild.id)
-        if not "positive_emojis" in server:
+        if "positive_emojis" not in server:
             server["positive_emojis"] = []
         server["positive_emojis"].append(emoji)
         ctx.channel.send(f"Added {emoji} to positive emojis")
@@ -61,21 +64,21 @@ class Admin_Commands(commands.Cog):
     @commands.command(hidden=True)
     async def addnegemoji(self, ctx, emoji):
         server = servers.get_server(ctx.guild.id)
-        if not "negative_emojis" in server:
+        if "negative_emojis" not in server:
             server["negative_emojis"] = []
         server["negative_emojis"].append(emoji)
         ctx.channel.send(f"Added {emoji} to negative emojis")
 
     @commands.command(hidden=True)
     @commands.check(is_admin)
-    async def manage(self, ctx, *args, **kwargs):
+    async def manage(self, ctx, *args):
         """Manage the bot. This command is hidden from the help command."""
         parser = argparse.ArgumentParser(exit_on_error=False)
         parser.add_argument("--toggle-user-creation", action=toggle_autocreate_user)
         parser.add_argument("--toggle-server-creation", action=toggle_autocreate_server)
         parser.add_argument("--default-score", action=override__G("DEFAULT_SCORE", type=int), nargs=1)
         args = shlex.split(ctx.message.clean_content)
-        if '--help' in args or '-h' in args:
+        if "--help" in args or "-h" in args:
             await ctx.channel.send(f"""
             Usage: !manage [--toggle-user-creation] [--toggle-server-creation] [--default-score]
             Sets global settings, current settings:
@@ -196,15 +199,20 @@ __**Code settings**__
 
     @commands.command(hidden=True)
     @commands.check(is_admin)
-    async def addrankrole(self, ctx, role,
-          lower_point=commands.parameter(default=float("-inf"), converter=float),
-          greater_point=commands.parameter(default=float("inf"), converter=float)
-        ):
+    async def addrankrole(
+        self,
+        ctx,
+        role,  # noqa
+        lower_point=commands.parameter(default=float("-inf"), converter=float),
+        greater_point=commands.parameter(default=float("inf"), converter=float),
+    ):
         if lower_point > greater_point:
-            raise ValueError("lower_point must be less than greater_point, syntax is: !addrankrole <role> <lower_point> <greater_point>")
+            raise ValueError(
+                "lower_point must be less than greater_point, syntax is: !addrankrole <role> <lower_point> <greater_point>"
+            )
         role_id = get_role_ids(ctx.message.content)[0]
         server = servers.get_server(ctx.guild.id)
-        if not "roles" in server:
+        if "roles" not in server:
             server["roles"] = {}
         server["roles"][role_id] = (lower_point, greater_point)
         await ctx.send(f"Added points threshold for role {role_id} from {lower_point} to {greater_point}")
@@ -238,7 +246,7 @@ __**Code settings**__
     ):
         server = servers.get_server(ctx.guild.id)
         if event not in (events := server.get("events", {})):
-            await ctx.channel.send("Invalid event, valid events are '{', '.join(events.keys())}")
+            await ctx.channel.send(f"Invalid event, valid events are '{', '.join(events.keys())}")
         else:
             server["events"][event] = points
 
@@ -251,7 +259,7 @@ __**Code settings**__
         points=commands.parameter(converter=int),
     ):
         server = servers.get_server(ctx.guild.id)
-        if not "events" in server:
+        if "events" not in server:
             server["events"] = {}
         server["events"][event] = points
 
@@ -288,6 +296,7 @@ __**Code settings**__
         current_channel_list = server["blacklisted_channels"]
         server["blacklisted_channels"] = [x for x in current_channel_list if x not in channel_ids]
         await ctx.send(f"Removed {', '.join([str(x) for x in channel_ids])} to blacklisted channel_ids")
+
 
 async def setup(bot):
     await bot.add_cog(Admin_Commands(bot))

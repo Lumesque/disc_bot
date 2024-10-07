@@ -1,16 +1,19 @@
-import discord
-from discord.ext import commands
-from ..config.globals import _G
-from ..server_data import servers
 import logging
 
-def get_roles(old_score, new_score, role_info):
+import discord
+from discord.ext import commands
+
+from ..server_data import servers
+
+
+def get_roles(new_score, role_info):
     new_roles = []
     for _id in role_info:
         lower, higher = role_info[_id]
         if new_score > lower and new_score < higher:
             new_roles.append(_id)
     return new_roles
+
 
 class Scores(commands.Cog):
     def __init__(self, bot):
@@ -35,12 +38,12 @@ class Scores(commands.Cog):
 
     def update_score(self, ctx, guild_id, member_id, name, change):
         player = self.servers.get_player(guild_id, member_id, name)
-        old_score = player.score
+        old_score = player.score  # noqa F841
         player.score += change
         role_info = servers.get_server(guild_id).get("roles", {})
         user = discord.utils.get(ctx.guild.members, id=member_id)
         old_role = player.rank_role
-        new_role = get_roles(old_score, player.score, role_info)
+        new_role = get_roles(player.score, role_info)
         print("Got", old_role, new_role)
 
         if old_role != new_role:
@@ -49,16 +52,17 @@ class Scores(commands.Cog):
 
     def update_score_no_ctx(self, user, guild_id, member_id, name, change):
         player = self.servers.get_player(guild_id, member_id, name)
-        old_score = player.score
+        old_score = player.score  # noqa: F841
         player.score += change
         role_info = servers.get_server(guild_id).get("roles", {})
         old_roles = player.rank_role or []
-        new_roles = get_roles(old_score, player.score, role_info)
+        new_roles = get_roles(player.score, role_info)
         self.logger.debug(f"New roles are {new_roles}, old_roles = {old_roles}")
 
         if not all(x in new_roles for x in old_roles):
             guild = user.guild
             self.bot.dispatch("role_threshold", user, role_info, new_roles, guild)
+
 
 async def setup(bot):
     await bot.add_cog(Scores(bot))

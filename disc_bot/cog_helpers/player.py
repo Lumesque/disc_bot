@@ -1,8 +1,11 @@
+import logging
 from dataclasses import dataclass, field
 from typing import Optional
+
 from ..config.globals import _G
-import logging
-logger = logging.getLogger('discord_player')
+
+logger = logging.getLogger("discord_player")
+
 
 @dataclass
 class DiscordPlayer:

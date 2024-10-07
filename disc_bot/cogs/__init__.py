@@ -1,13 +1,11 @@
-import os
-from pathlib import Path
-from .TranslatorCog import Translation_Commands
-from .BlankCog import BlankCog
-from .RankCog import Rank_Commands
-from .BidCog import Bidding_Commands
 from .AdminCog import Admin_Commands
-from .ScoreCog import Scores
-from .EventCog import Events
+from .BidCog import Bidding_Commands
+from .BlankCog import BlankCog
 from .CheckCog import Checks
+from .EventCog import Events
+from .RankCog import Rank_Commands
+from .ScoreCog import Scores
+from .TranslatorCog import Translation_Commands
 
 cogs_list = [
     Translation_Commands,

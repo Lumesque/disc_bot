@@ -1,1 +1,2 @@
-class PlayerNotFound(Exception): pass
+class PlayerNotFoundError(Exception):
+    pass

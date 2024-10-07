@@ -1,6 +1,8 @@
 import pytest
-from disc_bot.config.globals import _G
+
 from disc_bot.cog_helpers.player import DiscordPlayer
+from disc_bot.config.globals import _G
+
 
 @pytest.mark.trylast
 def test_global_change():

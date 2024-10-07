@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 
 Keeps record of history and emojis with the add message
@@ -11,7 +10,7 @@ from collections import defaultdict
 
 
 class MessageHistory:
-    def __init__(self, message_cap=20, **kwargs):
+    def __init__(self, message_cap=20):
         self._messages = defaultdict(dict)
         self._reaction_from_users = defaultdict(dict)
         self._message_cap = message_cap
@@ -22,9 +21,7 @@ class MessageHistory:
             (k := next(iter(self._messages)), self._messages.pop(k))
 
     def is_message_stored(self, message) -> bool:
-        if any(x for x in self._messages.keys() if x == message):
-            return True
-        return False
+        return any(x for x in self._messages if x == message)
 
     def add_user_message(self, message, user, emoji):
         if not self._messages[message].get(emoji, None):
@@ -39,16 +36,14 @@ class MessageHistory:
         return False
 
     def has_message_expired(self, message) -> bool:
-        if any(x for x in self._messages.keys() if x == message):
-            return False
-        return True
+        return any(x for x in self._messages if x == message)
 
     def user_reactions(self, user, reaction):
         self._reaction_from_users[user] = reaction
 
     def list_message_senders(self):
         users = []
-        for message in self._messages.keys():
+        for message in self._messages:
             user = message.author.name
             if user not in users:
                 users.append(user)

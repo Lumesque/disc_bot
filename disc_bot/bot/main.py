@@ -1,22 +1,17 @@
-import os
-import discord
-import logging
 import json
+import logging
 
 from discord.ext import commands, tasks
+
 from ..cogs import extensions_list
+from ..server_data import history, servers
 from ..utils import is_admin, is_blacklisted
-from ..server_data import servers, history
 
 logger = logging.getLogger("bot")
 
 
 def run(token, intents):
-    bot = commands.Bot(
-        command_prefix='!',
-        guild_subscriptions=True,
-        intents=intents
-    )
+    bot = commands.Bot(command_prefix="!", guild_subscriptions=True, intents=intents)
 
     @bot.event
     async def on_ready():
@@ -26,10 +21,8 @@ def run(token, intents):
         for cog in extensions_list:
             print(cog)
             await bot.load_extension(cog)
-        extension_names = [x.split('.')[-1] for x in extensions_list]
-        logger.debug(
-            f"Successfully registered {', '.join(extension_names)}"
-        )
+        extension_names = [x.split(".")[-1] for x in extensions_list]
+        logger.debug(f"Successfully registered {', '.join(extension_names)}")
 
     @bot.command()
     @commands.check(is_admin)
@@ -56,11 +49,8 @@ def run(token, intents):
 
     @bot.command()
     @commands.check(is_admin)
-    async def loggerlevel(
-        ctx,
-        level=commands.parameter(converter=int)
-    ):
-        if level not in range(1,6):
+    async def loggerlevel(ctx, level=commands.parameter(converter=int)):  # noqa
+        if level not in range(1, 6):
             raise ValueError("Level must be from 1-5")
         logging.config.fileConfig(f"disc_bot/config/output_level_{level}.cfg")
 
@@ -69,7 +59,7 @@ def run(token, intents):
         history_data = servers.to_json()
         with history.open(mode="w") as f:
             json.dump(history_data, f, indent=4)
-        logger.info(f"Saved json data")
+        logger.info("Saved json data")
 
     bot.add_check(is_blacklisted)
 

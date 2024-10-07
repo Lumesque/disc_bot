@@ -1,12 +1,11 @@
 from .server_data import servers
 
+
 def is_admin(ctx):
     server_admin_list = servers.get_server(ctx.guild.id).get("admin_ids", [])
     roles = ctx.author.roles
-    if ctx.author == ctx.author.guild.owner or any(role.id in server_admin_list for role in roles):
-        return True
-    else:
-        return False
+    return ctx.author == ctx.author.guild.owner or any(role.id in server_admin_list for role in roles)
+
 
 def is_blacklisted(ctx):
     server_blacklisted_list = servers.get_server(ctx.guild.id).get("blacklisted_channels", [])

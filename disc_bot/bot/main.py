@@ -71,6 +71,7 @@ def run(token, intents):
         if level not in range(1, 6):
             raise ValueError("Level must be from 1-5")
         logging.config.fileConfig(f"disc_bot/config/output_level_{level}.cfg")
+        await ctx.channel.send(f"Changed logger level to {level}")
 
     @tasks.loop(hours=6)
     async def save():

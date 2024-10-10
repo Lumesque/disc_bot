@@ -2,12 +2,22 @@ import dataclasses as dc
 import warnings
 from collections import UserDict
 from copy import deepcopy
+from typing import Iterable
 
 from ..config.globals import _G
 from ..exceptions.ranks import PlayerNotFoundError
 from .player import DiscordPlayer
 
-IGNORED_KEYS = ("admin_ids", "roles", "events", "positive_emojis", "negative_emojis", "blacklisted_channels")
+IGNORED_KEYS = (
+    "admin_ids",
+    "roles",
+    "events",
+    "positive_emojis",
+    "negative_emojis",
+    "blacklisted_channels",
+    "last_online",
+    "last_save",
+)
 
 
 def int_all_in_dict(x: dict):
@@ -62,7 +72,7 @@ class ServerContainer(UserDict):
                 server = self.add_server(server_id)
                 warnings.warn(
                     "Server does not exist, creating new server. If you would like to not see this message, please disable auto-creation, or add server and save",
-                    stacklevel = 2,
+                    stacklevel=2,
                 )
             else:
                 raise KeyError(f"Server {server_id} does not exist")
@@ -101,6 +111,8 @@ class ServerContainer(UserDict):
         json_data = int_all_in_dict(json_data)
         for server_id in json_data:
             temp = json_data[server_id]
+            if (not isinstance(temp, Iterable)) or isinstance(temp, str):
+                continue
             for user_id in temp:
                 if not isinstance(temp[user_id], dict) or user_id in IGNORED_KEYS:
                     continue
@@ -130,11 +142,13 @@ class ServerContainer(UserDict):
             current_server = temp[
                 server_id
             ]  # {'admin_ids': [<role_id>, <role_id>, ...], 'roles': {...}, '<user_id>': {...}}
-            for key in current_server:
-                current_user = current_server[key]
-                # Serialize
-                if not dc.is_dataclass(current_user):
-                    continue
-                temp[server_id][key] = dc.asdict(current_user)
+            # If we are not on a server object, just keep going
+            if isinstance(current_server, Iterable) and not isinstance(current_server, str):
+                for key in current_server:
+                    current_user = current_server[key]
+                    # Serialize
+                    if not dc.is_dataclass(current_user):
+                        continue
+                    temp[server_id][key] = dc.asdict(current_user)
         print(temp)
         return temp

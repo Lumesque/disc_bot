@@ -1,6 +1,9 @@
 import json
 import logging
+from contextlib import suppress
+from datetime import datetime
 
+import discord
 from discord.ext import commands, tasks
 
 from ..cogs import extensions_list
@@ -19,15 +22,30 @@ def run(token, intents):
 
     async def setup(bot):
         for cog in extensions_list:
-            print(cog)
             await bot.load_extension(cog)
         extension_names = [x.split(".")[-1] for x in extensions_list]
         logger.debug(f"Successfully registered {', '.join(extension_names)}")
+        if "last_online" in servers:
+            await update(datetime.fromtimestamp(servers["last_online"]))
+        await save()
+        logger.info("Bot finished setup")
 
-    @bot.command()
+    async def update(date):
+        for guild in bot.guilds:
+            for chnl in guild.text_channels:
+                with suppress(discord.errors.Forbidden):
+                    async for msg in chnl.history(after=date):
+                        bot.dispatch("message", msg)
+                        for reaction in msg.reactions:
+                            bot.dispatch("reaction", reaction, msg.author)
+
+    @bot.command(hidden=True)
     @commands.check(is_admin)
-    async def ping(ctx):
-        await ctx.send("Pong!")
+    async def shutdown(ctx):
+        servers["last_online"] = datetime.now().timestamp()
+        write_json_data()
+        await ctx.channel.send("Bot has officially shutdown, bye!")
+        await bot.close()
 
     @bot.command()
     @commands.check(is_admin)
@@ -56,10 +74,15 @@ def run(token, intents):
 
     @tasks.loop(hours=6)
     async def save():
+        servers["last_online"] = datetime.now().timestamp()
+        servers["last_save"] = datetime.now().timestamp()
+        write_json_data()
+        logger.info("Saved json data")
+
+    def write_json_data():
         history_data = servers.to_json()
         with history.open(mode="w") as f:
             json.dump(history_data, f, indent=4)
-        logger.info("Saved json data")
 
     bot.add_check(is_blacklisted)
 

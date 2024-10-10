@@ -24,5 +24,5 @@ def main():
 
 
 if __name__ == "__main__":
-    logging.config.fileConfig("disc_bot/config/output_level_1.cfg")
+    logging.config.fileConfig("disc_bot/config/output_level_2.cfg")
     sys.exit(main())

@@ -3,11 +3,12 @@ import json
 import logging
 import re
 import shlex
+from datetime import datetime
 
 from discord.ext import commands
 
 from ..config.globals import _G
-from ..server_data import history, servers
+from ..server_data import RESOURCE_PATH, history, servers
 from ..utils import is_admin
 
 
@@ -230,14 +231,6 @@ __**Code settings**__
 
     @commands.command(hidden=True)
     @commands.check(is_admin)
-    async def save(self, ctx):
-        history_data = servers.to_json()
-        with history.open(mode="w") as f:
-            json.dump(history_data, f, indent=4)
-        await ctx.send("Saved")
-
-    @commands.command(hidden=True)
-    @commands.check(is_admin)
     async def change_event(
         self,
         ctx,
@@ -296,6 +289,21 @@ __**Code settings**__
         current_channel_list = server["blacklisted_channels"]
         server["blacklisted_channels"] = [x for x in current_channel_list if x not in channel_ids]
         await ctx.send(f"Removed {', '.join([str(x) for x in channel_ids])} to blacklisted channel_ids")
+
+    @commands.command(hidden=True)
+    @commands.check(is_admin)
+    async def save(self, ctx):
+        servers["last_online"] = datetime.now().timestamp()
+        servers["last_save"] = datetime.now().timestamp()
+        self.write_json_data()
+        self.logger.info("Saved json data, dispatching to bots")
+        self.bot.dispatch("save", RESOURCE_PATH)
+        await ctx.channel.send("Saved")
+
+    def write_json_data(self):
+        history_data = servers.to_json()
+        with history.open(mode="w") as f:
+            json.dump(history_data, f, indent=4)
 
 
 async def setup(bot):

@@ -6,9 +6,9 @@ from datetime import datetime
 import discord
 from discord.ext import commands, tasks
 
-from ..cogs import extensions_list
-from ..server_data import history, servers
-from ..utils import is_admin, is_blacklisted
+from ..cogs import delayed_extension_list, extensions_list
+from ..server_data import RESOURCE_PATH, history, servers
+from ..utils import is_admin, is_blacklisted, startup_check
 
 logger = logging.getLogger("bot")
 
@@ -26,9 +26,13 @@ def run(token, intents):
         extension_names = [x.split(".")[-1] for x in extensions_list]
         logger.debug(f"Successfully registered {', '.join(extension_names)}")
         if "last_online" in servers:
-            await update(datetime.fromtimestamp(servers["last_online"]))
+            await update(datetime.fromtimestamp(servers["last_online"]))  # noqa DTZ006
+        for cog in delayed_extension_list:
+            await bot.load_extension(cog)
+        logger.info("Bot finished setup, letting all cogs do their own")
+        bot.dispatch("setup", RESOURCE_PATH)
         await save()
-        logger.info("Bot finished setup")
+        bot.remove_check(startup_check)
 
     async def update(date):
         for guild in bot.guilds:
@@ -45,6 +49,7 @@ def run(token, intents):
         servers["last_online"] = datetime.now().timestamp()
         write_json_data()
         await ctx.channel.send("Bot has officially shutdown, bye!")
+        bot.dispatch("close", RESOURCE_PATH)
         await bot.close()
 
     @bot.command()
@@ -67,7 +72,7 @@ def run(token, intents):
 
     @bot.command()
     @commands.check(is_admin)
-    async def loggerlevel(ctx, level=commands.parameter(converter=int)):  # noqa
+    async def loggerlevel(ctx, level=commands.parameter(converter=int)):
         if level not in range(1, 6):
             raise ValueError("Level must be from 1-5")
         logging.config.fileConfig(f"disc_bot/config/output_level_{level}.cfg")
@@ -78,7 +83,8 @@ def run(token, intents):
         servers["last_online"] = datetime.now().timestamp()
         servers["last_save"] = datetime.now().timestamp()
         write_json_data()
-        logger.info("Saved json data")
+        logger.info("Saved json data, dispatching to bots")
+        bot.dispatch("save", RESOURCE_PATH)
 
     def write_json_data():
         history_data = servers.to_json()
@@ -86,5 +92,7 @@ def run(token, intents):
             json.dump(history_data, f, indent=4)
 
     bot.add_check(is_blacklisted)
+    # This is so that nothing starts up and sends something
+    bot.add_check(startup_check)
 
     bot.run(token)

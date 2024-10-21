@@ -150,5 +150,4 @@ class ServerContainer(UserDict):
                     if not dc.is_dataclass(current_user):
                         continue
                     temp[server_id][key] = dc.asdict(current_user)
-        print(temp)
         return temp

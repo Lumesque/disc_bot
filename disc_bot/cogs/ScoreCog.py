@@ -44,7 +44,6 @@ class Scores(commands.Cog):
         user = discord.utils.get(ctx.guild.members, id=member_id)
         old_role = player.rank_role
         new_role = get_roles(player.score, role_info)
-        print("Got", old_role, new_role)
 
         if old_role != new_role:
             guild = user.guild

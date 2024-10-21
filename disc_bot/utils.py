@@ -11,3 +11,7 @@ def is_blacklisted(ctx):
     server_blacklisted_list = servers.get_server(ctx.guild.id).get("blacklisted_channels", [])
     channel_id = ctx.channel.id
     return channel_id not in server_blacklisted_list
+
+
+def startup_check(ctx): # noqa ARG001
+    return False

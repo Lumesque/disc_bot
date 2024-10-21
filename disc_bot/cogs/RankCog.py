@@ -42,6 +42,7 @@ class Rank_Commands(commands.Cog):
 
     @commands.command()
     async def ranks(self, ctx):
+        "See the current rankings in this server"
         server = self.servers.get_server(ctx.guild.id)
         server = {k: v for k, v in server.items() if k not in IGNORED_KEYS}
         _list = sorted(server.values(), key=lambda x: x.score, reverse=True)

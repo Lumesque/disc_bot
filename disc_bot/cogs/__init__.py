@@ -19,7 +19,6 @@ cogs_list = [
 ]
 
 extensions_list = [
-    "disc_bot.cogs.TranslatorCog",
     "disc_bot.cogs.BlankCog",
     "disc_bot.cogs.RankCog",
     "disc_bot.cogs.BidCog",
@@ -27,4 +26,10 @@ extensions_list = [
     "disc_bot.cogs.ScoreCog",
     "disc_bot.cogs.EventCog",
     "disc_bot.cogs.CheckCog",
+    "disc_bot.cogs.RouletteCog",
+]
+# Values that would send out messages prior to updating the system
+delayed_extension_list = [
+    "disc_bot.cogs.TranslatorCog",
+    "disc_bot.cogs.ErrorCog",
 ]

@@ -42,7 +42,9 @@ class Events(commands.Cog):
             scores = self.bot.get_cog("Scores")
             scores.update_score_no_ctx(user, guild.id, user.id, user.name, change=point_change)
             scores.update_score_no_ctx(author, guild.id, author.id, author.name, change=point_change // 2)
-            self.logger.debug(f"User {user.name} reacted *positively* to {author.name} message")
+            self.logger.debug(
+                f"User {user.name} reacted *positively* to {author.name} message, adding {point_change} to {user.name} and {point_change//2} to {author.display_name}"
+            )
         if reaction.emoji in server.get("negative_emojis", []) and "on_reaction_add_negative" in server.get(
             "events", {}
         ):
@@ -51,7 +53,9 @@ class Events(commands.Cog):
             scores = self.bot.get_cog("Scores")
             scores.update_score_no_ctx(user, guild.id, user.id, user.name, change=-point_change)
             scores.update_score_no_ctx(author, guild.id, author.id, author.name, change=-(point_change // 2))
-            self.logger.debug(f"User {user.name} reacted *negatively* to {author.name} message")
+            self.logger.debug(
+                f"User {user.name} reacted *negatively* to {author.name} message, removing {point_change} to {user.name} and {point_change//2} to {author.display_name}"
+            )
 
     @commands.Cog.listener()
     async def on_message(self, msg):
